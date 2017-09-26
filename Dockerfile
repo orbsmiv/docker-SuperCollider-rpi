@@ -18,7 +18,7 @@ RUN apt-get update && \
         libudev-dev \
         libavahi-client-dev \
         libfftw3-dev \
-        # make \
+        make \
         cmake \
         git \
         gcc-4.8 \
@@ -40,12 +40,6 @@ RUN mkdir /tmp/jackd-compile \
 
 RUN echo "@audio - memlock 256000" >> /etc/security/limits.conf \
         && echo "@audio - rtprio 75" >> /etc/security/limits.conf
-
-RUN apt-get update && \
-        apt-get install -y --no-install-recommends \
-        make && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /tmp/supercollider-compile \
         && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
