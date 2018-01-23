@@ -80,6 +80,8 @@ RUN [ "cross-build-end" ]
 
 FROM orbsmiv/jackaudiojack2-rpi:latest
 
+RUN [ "cross-build-start" ]
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
@@ -88,8 +90,6 @@ RUN apt-get update && \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
         && rm -rf /tmp/supercollider-compile
-
-RUN [ "cross-build-start" ]
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
 COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
