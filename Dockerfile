@@ -3,6 +3,8 @@ MAINTAINER orbsmiv@hotmail.com
 
 RUN [ "cross-build-start" ]
 
+ARG version="3.9.0"
+
 # Set environment variables
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -27,12 +29,9 @@ RUN apt-get update && \
 
 RUN mkdir /tmp/supercollider-compile \
         # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
-        && git clone --recursive git://github.com/supercollider/supercollider /tmp/supercollider-compile
+        && git clone --recursive --depth 1 --branch Version-${version} git://github.com/supercollider/supercollider /tmp/supercollider-compile
 
 WORKDIR /tmp/supercollider-compile
-
-RUN git checkout 3.9 \
-        && git submodule init && git submodule update
 
 RUN /bin/sed -i'' "s@mTimer.cancel();@if (error==boost::system::errc::success) {mTimer.cancel();} else {return;}@" lang/LangSource/SC_TerminalClient.cpp
 
@@ -66,16 +65,6 @@ RUN cmake -L \
 RUN mv /usr/local/share/SuperCollider/SCClassLibrary/Common/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/GUI \
         && mv /usr/local/share/SuperCollider/SCClassLibrary/JITLib/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/JITLibGUI
 
-# RUN apt-get purge \
-#           make \
-#           cmake \
-#           git \
-#           gcc-4.8 \
-#           g++-4.8 \
-#         && apt-get clean \
-#         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-#         && rm -rf /tmp/supercollider-compile
-
 RUN [ "cross-build-end" ]
 
 FROM orbsmiv/jackaudiojack2-rpi:latest
@@ -101,7 +90,6 @@ COPY --from=build /usr/local/share/pixmaps/supercollider.png /usr/local/share/pi
 COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pixmaps/supercollider.xpm
 COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
 COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
-
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
