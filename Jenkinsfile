@@ -17,7 +17,7 @@ node {
     // }
 
     stage('build-docker-image') {
-        sh 'ls -laR'
+        sh 'ls -la'
         def tagName = tagFinder(scmVars.GIT_BRANCH)
         echo tagName
         def tagPush = tagPushName(scmVars.GIT_BRANCH)
