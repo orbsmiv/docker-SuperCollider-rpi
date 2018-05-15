@@ -3,6 +3,8 @@ node {
     def scmVars
 
     stage('scm-clone') {
+        echo "check initial dir contents"
+        sh "ls -laR"
         dir('supercollider') {
             // Note that the checkout is hard-coded to search for Version-3.9* only.
             scmVars = checkout([$class: 'GitSCM', branches: [[name: '*/tags/Version-3.9*']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[refspec: '+refs/tags/*:refs/remotes/origin/tags/*', url: 'https://github.com/supercollider/supercollider/']]])
