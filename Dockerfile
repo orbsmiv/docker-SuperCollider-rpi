@@ -3,7 +3,7 @@ MAINTAINER orbsmiv@hotmail.com
 
 RUN [ "cross-build-start" ]
 
-ARG version="3.9.0"
+ARG VERSION="3.9.0"
 
 # Set environment variables
 ARG DEBIAN_FRONTEND=noninteractive
@@ -29,7 +29,7 @@ RUN apt-get update && \
 
 RUN mkdir /tmp/supercollider-compile \
         # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
-        && git clone --recursive --depth 1 --branch Version-${version} git://github.com/supercollider/supercollider /tmp/supercollider-compile
+        && git clone --recursive --depth 1 --branch ${VERSION} git://github.com/supercollider/supercollider /tmp/supercollider-compile
 
 WORKDIR /tmp/supercollider-compile
 
