@@ -22,7 +22,7 @@ node {
         def tagPush = tagPushName(scmVars.GIT_BRANCH)
         echo tagPush
         echo "Building image"
-        def newImage = docker.build("orbsmiv/test-private:${tagPush}", "--build-arg VERSION=\"${tagName}\" ./docker")
+        def newImage = docker.build("orbsmiv/supercollider-rpi:${tagPush}", "--build-arg VERSION=\"${tagName}\" ./docker")
         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-creds') {
             newImage.push()
             newImage.push("latest")
