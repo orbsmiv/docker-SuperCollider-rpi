@@ -76,6 +76,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
         libfftw3-3 \
+        supervisor \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
         && rm -rf /tmp/supercollider-compile
@@ -94,6 +95,9 @@ COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/sh
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/bin/supervisord"]
 
 RUN [ "cross-build-end" ]
