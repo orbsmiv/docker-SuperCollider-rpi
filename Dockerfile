@@ -97,7 +97,7 @@ RUN chmod +x /entrypoint.sh
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord"]
 
 RUN [ "cross-build-end" ]
