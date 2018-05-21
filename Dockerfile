@@ -67,6 +67,14 @@ RUN cmake -L \
 
 RUN [ "cross-build-end" ]
 
+FROM golang:1.10-alpine as supervisord-builder
+
+RUN apk add --no-cache --update git
+
+ARG SUPERVISORD_TAG="v0.4"
+
+# Add the rest of the checkout, go build etc. here
+
 FROM orbsmiv/jackaudiojack2-rpi:latest
 
 RUN [ "cross-build-start" ]
