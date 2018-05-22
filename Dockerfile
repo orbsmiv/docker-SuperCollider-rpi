@@ -73,7 +73,14 @@ RUN apk add --no-cache --update git
 
 ARG SUPERVISORD_TAG="v0.4"
 
-# Add the rest of the checkout, go build etc. here
+RUN go get -v -u github.com/ochinchina/supervisord
+
+# RUN cd /go/src/github.com/ochinchina/supervisord \
+#         && git checkout tags/${SUPERVISORD_TAG}
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a \
+        -ldflags "-extldflags -static" -o /usr/local/bin/supervisord \
+        github.com/ochinchina/supervisord
 
 FROM orbsmiv/jackaudiojack2-rpi:latest
 
@@ -84,10 +91,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
         libfftw3-3 \
-        supervisor \
+        libsndfile1 \
+        libx11-6 \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
         && rm -rf /tmp/supercollider-compile
+
+COPY --from=supervisord-builder /usr/local/bin/supervisord /usr/local/bin/supervisord
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
 COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
