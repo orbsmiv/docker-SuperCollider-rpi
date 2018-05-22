@@ -134,6 +134,14 @@ RUN chmod +x /entrypoint.sh
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY sc-supervisord.conf /etc/supervisor/conf.d/sc-supervisord.conf
 
+ENV CH_OUT=2
+ENV CH_IN=2
+ENV SC_SYNTH_PORT=57110
+ENV SR=48000
+ENV SC_BLOCK=128
+ENV HW_BUFF=2048
+ENV SC_MEM=131072
+
 RUN mkdir -p /var/log/supervisor
 
 ENTRYPOINT ["/entrypoint.sh"]
