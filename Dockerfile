@@ -69,6 +69,25 @@ RUN cmake -L \
 # RUN mv /usr/local/share/SuperCollider/SCClassLibrary/Common/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/GUI \
         # && mv /usr/local/share/SuperCollider/SCClassLibrary/JITLib/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/JITLibGUI
 
+RUN mkdir /tmp/supercollider-plugs-compile \
+        # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
+        && git clone --recursive --depth 1 --branch \
+        git://github.com/supercollider/sc3-plugins \
+        /tmp/supercollider-plugs-compile
+
+RUN mkdir /tmp/supercollider-plugs-compile/build
+
+WORKDIR /tmp/supercollider-plugs-compile/build
+
+RUN cmake -L \
+            -DCMAKE_BUILD_TYPE="Release" \
+            -DSUPERNOVA=OFF \
+            -DNATIVE=OFF \
+            -DSC_PATH=../../supercollider/ \
+            .. \
+        && make -j 4 \
+        && make install
+
 RUN [ "cross-build-end" ]
 
 FROM golang:1.10-alpine as supervisord-builder
