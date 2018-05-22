@@ -14,13 +14,13 @@ RUN apt-get update && \
           alsa-base \
           libicu-dev \
           libasound2-dev \
-          libjack-jackd2-dev \
+          # libjack-jackd2-dev \
           libsamplerate0-dev \
           libsndfile1-dev \
           libreadline-dev \
           libxt-dev \
           libudev-dev \
-          libavahi-client-dev \
+          # libavahi-client-dev \
           libfftw3-dev \
           make \
           cmake \
