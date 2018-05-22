@@ -55,7 +55,9 @@ RUN cmake -L \
             -DSC_QT=OFF \
             -DSC_ED=OFF \
             -DSC_EL=OFF \
+            -DINSTALL_HELP=OFF \
             -DSC_VIM=ON \
+            -DNO_AVAHI=ON \
             .. \
         && make -j 4 \
         && make install \
