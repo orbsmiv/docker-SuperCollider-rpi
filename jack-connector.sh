@@ -9,13 +9,17 @@ while ! /usr/local/bin/jack_lsp | /bin/grep -F "SuperCollider" > /dev/null; do
   /bin/sleep 1
 done
 
-for i in $(seq 1 ${CH_OUT}); do
-  $CONN_PATH SuperCollider:out_$i system:playback_$i ;
-done
+if ((${CH_OUT} > 0)); then
+  for i in $(seq 1 ${CH_OUT}); do
+    echo $CONN_PATH SuperCollider:out_$i system:playback_$i ;
+  done;
+fi
 
-for i in $(seq 1 ${CH_IN}); do
-  $CONN_PATH SuperCollider:in_$i system:capture_$i ;
-done
+if ((${CH_IN} > 0)); then
+  for i in $(seq 1 ${CH_IN}); do
+    echo $CONN_PATH SuperCollider:in_$i system:capture_$i ;
+  done;
+fi
 
 sleep 1
 
