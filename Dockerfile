@@ -71,7 +71,7 @@ RUN cmake -L \
 
 RUN mkdir /tmp/supercollider-plugs-compile \
         # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
-        && git clone --recursive --depth 1 --branch \
+        && git clone --recursive --depth 1 \
         git://github.com/supercollider/sc3-plugins \
         /tmp/supercollider-plugs-compile
 
