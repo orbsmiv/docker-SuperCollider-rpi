@@ -115,9 +115,12 @@ COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/sh
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY sc-supervisord.conf /etc/supervisor/conf.d/sc-supervisord.conf
+
+RUN mkdir -p /var/log/supervisor
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/bin/supervisord"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 RUN [ "cross-build-end" ]
