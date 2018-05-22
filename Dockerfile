@@ -1,9 +1,10 @@
-FROM resin/raspberrypi3-debian:latest AS build
+# FROM resin/raspberrypi3-debian:latest AS build
+FROM orbsmiv/jackaudiojack2-rpi:latest AS build
 MAINTAINER orbsmiv@hotmail.com
 
 RUN [ "cross-build-start" ]
 
-ARG VERSION="Version-3.9.0"
+ARG VERSION="Version-3.9.3"
 
 # Set environment variables
 ARG DEBIAN_FRONTEND=noninteractive
@@ -48,6 +49,7 @@ ARG CXX=/usr/bin/g++-4.8
 RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
             -DBUILD_TESTING=OFF \
+            -DENABLE_TESTSUITE=OFF \
             -DSUPERNOVA=OFF \
             -DNATIVE=OFF \
             -DSC_WII=OFF \
