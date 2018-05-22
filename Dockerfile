@@ -134,6 +134,8 @@ RUN chmod +x /entrypoint.sh
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY sc-supervisord.conf /etc/supervisor/conf.d/sc-supervisord.conf
 
+COPY jack-connector.sh /jack-connector.sh
+
 RUN mkdir -p /var/log/supervisor
 
 ENV CH_OUT=2 \
