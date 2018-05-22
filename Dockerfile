@@ -83,7 +83,7 @@ RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
             -DSUPERNOVA=OFF \
             -DNATIVE=OFF \
-            -DSC_PATH=../../supercollider/ \
+            -DSC_PATH=/tmp/supercollider-compile/ \
             .. \
         && make -j 4 \
         && make install
