@@ -14,13 +14,11 @@ RUN apt-get update && \
           alsa-base \
           libicu-dev \
           libasound2-dev \
-          # libjack-jackd2-dev \
           libsamplerate0-dev \
           libsndfile1-dev \
           libreadline-dev \
           libxt-dev \
           libudev-dev \
-          # libavahi-client-dev \
           libfftw3-dev \
           make \
           cmake \
@@ -29,8 +27,9 @@ RUN apt-get update && \
           g++-4.8
 
 RUN mkdir /tmp/supercollider-compile \
-        # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
-        && git clone --recursive --depth 1 --branch ${VERSION} git://github.com/supercollider/supercollider /tmp/supercollider-compile
+        && git clone --recursive --depth 1 --branch ${VERSION} \
+        git://github.com/supercollider/supercollider \
+        /tmp/supercollider-compile
 
 WORKDIR /tmp/supercollider-compile
 
@@ -39,9 +38,6 @@ RUN /bin/sed -i'' "s@mTimer.cancel();@if (error==boost::system::errc::success) {
 RUN mkdir /tmp/supercollider-compile/build
 
 WORKDIR /tmp/supercollider-compile/build
-
-# RUN export CC=/usr/bin/gcc-4.8 \
-#         && export CXX=/usr/bin/g++-4.8
 
 ARG CC=/usr/bin/gcc-4.8
 ARG CXX=/usr/bin/g++-4.8
@@ -70,7 +66,6 @@ RUN cmake -L \
         # && mv /usr/local/share/SuperCollider/SCClassLibrary/JITLib/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/JITLibGUI
 
 RUN mkdir /tmp/supercollider-plugs-compile \
-        # && git clone --recursive --depth 1 git://github.com/supercollider/supercollider /tmp/supercollider-compile \
         && git clone --recursive --depth 1 \
         git://github.com/supercollider/sc3-plugins \
         /tmp/supercollider-plugs-compile
