@@ -11,13 +11,13 @@ done
 
 if ((${CH_OUT} > 0)); then
   for i in $(seq 1 ${CH_OUT}); do
-    echo $CONN_PATH SuperCollider:out_$i system:playback_$i ;
+    $CONN_PATH SuperCollider:out_$i system:playback_$i ;
   done;
 fi
 
 if ((${CH_IN} > 0)); then
   for i in $(seq 1 ${CH_IN}); do
-    echo $CONN_PATH SuperCollider:in_$i system:capture_$i ;
+    $CONN_PATH SuperCollider:in_$i system:capture_$i ;
   done;
 fi
 
