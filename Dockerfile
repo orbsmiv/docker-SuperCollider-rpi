@@ -126,6 +126,9 @@ COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pi
 COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
 COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
 
+# Temporary fix to remove UIUGens, which requires libx11
+RUN rm /usr/local/lib/SuperCollider/plugins/UIUGens.so
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
