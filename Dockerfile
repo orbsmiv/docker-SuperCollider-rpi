@@ -109,7 +109,6 @@ RUN apt-get update && \
         apt-get install -y --no-install-recommends \
         libfftw3-3 \
         libsndfile1 \
-        libx11-6 \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
         && rm -rf /tmp/supercollider-compile
