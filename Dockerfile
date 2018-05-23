@@ -38,8 +38,8 @@ RUN mkdir /tmp/supercollider-compile/build
 
 WORKDIR /tmp/supercollider-compile/build
 
-ARG CC=/usr/bin/gcc-4.8
-ARG CXX=/usr/bin/g++-4.8
+ARG CC=/usr/bin/gcc
+ARG CXX=/usr/bin/g++
 
 RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
