@@ -11,7 +11,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
-          alsa-base \
           libicu-dev \
           libasound2-dev \
           libsamplerate0-dev \
@@ -23,8 +22,8 @@ RUN apt-get update && \
           make \
           cmake \
           git \
-          gcc-4.8 \
-          g++-4.8
+          gcc \
+          g++
 
 RUN mkdir /tmp/supercollider-compile \
         && git clone --recursive --depth 1 --branch ${VERSION} \
