@@ -4,7 +4,7 @@ MAINTAINER orbsmiv@hotmail.com
 
 RUN [ "cross-build-start" ]
 
-ARG VERSION="Version-3.9.3"
+ARG VERSION="topic/no-uiugens"
 
 # Set environment variables
 ARG DEBIAN_FRONTEND=noninteractive
@@ -27,7 +27,7 @@ RUN apt-get update && \
 
 RUN mkdir /tmp/supercollider-compile \
         && git clone --recursive --depth 1 --branch ${VERSION} \
-        git://github.com/supercollider/supercollider \
+        git://github.com/orbsmiv/supercollider \
         /tmp/supercollider-compile
 
 WORKDIR /tmp/supercollider-compile
@@ -55,6 +55,7 @@ RUN cmake -L \
             -DINSTALL_HELP=OFF \
             -DSC_VIM=ON \
             -DNO_AVAHI=ON \
+            -DNO_UIUGENS=ON \
             .. \
         && make -j 4 \
         && make install \
