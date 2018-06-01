@@ -4,7 +4,7 @@ node {
 
     stage('scm-clone') {
         // Note that the checkout is hard-coded to search for Version-3.* only.
-        scmVars = checkout([$class: 'GitSCM', branches: [[name: '*/tags/Version-3.*']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[refspec: '+refs/tags/*:refs/remotes/origin/tags/*', url: 'https://github.com/supercollider/supercollider/']]])
+        scmVars = checkout([$class: 'GitSCM', branches: [[name: '*/tags/Version-3.*']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[refspec: '+refs/tags/Version-*:refs/remotes/origin/tags/Version-*', url: 'https://github.com/supercollider/supercollider/']]])
 
         echo scmVars.GIT_BRANCH
     }
