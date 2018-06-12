@@ -55,7 +55,7 @@ RUN cmake -L \
             -DINSTALL_HELP=OFF \
             -DSC_VIM=ON \
             -DNO_AVAHI=ON \
-            -DNO_UIUGENS=ON \
+            -DNO_X11=ON \
             .. \
         && make -j 4 \
         && make install \
