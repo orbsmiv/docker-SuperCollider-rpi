@@ -145,7 +145,8 @@ ENV CH_OUT=2 \
     SR=48000 \
     SC_BLOCK=128 \
     HW_BUFF=2048 \
-    SC_MEM=131072
+    SC_MEM=131072 \
+    ALSA_DEV="hw:0"
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
