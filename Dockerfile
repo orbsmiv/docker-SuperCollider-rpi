@@ -4,7 +4,7 @@ MAINTAINER orbsmiv@hotmail.com
 
 RUN [ "cross-build-start" ]
 
-ARG VERSION="Version-3.9.3"
+ARG VERSION="Version-3.10.2"
 
 # Set environment variables
 ARG DEBIAN_FRONTEND=noninteractive
