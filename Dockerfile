@@ -55,6 +55,7 @@ RUN cmake -L \
             -DINSTALL_HELP=OFF \
             -DSC_VIM=ON \
             -DNO_AVAHI=ON \
+            -DNO_X11=ON \
             .. \
         && make -j 4 \
         && make install \
@@ -127,7 +128,7 @@ COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/s
 COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
 
 # Temporary fix to remove UIUGens, which requires libx11
-RUN rm /usr/local/lib/SuperCollider/plugins/UIUGens.so
+#RUN rm /usr/local/lib/SuperCollider/plugins/UIUGens.so
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
