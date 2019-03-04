@@ -84,11 +84,11 @@ RUN cmake -L \
 
 RUN [ "cross-build-end" ]
 
-FROM golang:1.10-alpine as supervisord-builder
+FROM golang:1.12-alpine as supervisord-builder
 
 RUN apk add --no-cache --update git
 
-ARG SUPERVISORD_TAG="v0.4"
+ARG SUPERVISORD_TAG="v0.5"
 
 RUN go get -v -u github.com/ochinchina/supervisord
 
