@@ -121,7 +121,7 @@ COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
 COPY --from=build /usr/local/lib/SuperCollider /usr/local/lib/SuperCollider
 COPY --from=build /usr/local/bin/scsynth /usr/local/bin/scsynth
 COPY --from=build /usr/local/bin/sclang /usr/local/bin/sclang
-COPY --from=build /usr/local/share/doc/SuperCollider/examples /usr/local/share/doc/SuperCollider/examples
+#COPY --from=build /usr/local/share/doc/SuperCollider/examples /usr/local/share/doc/SuperCollider/examples
 COPY --from=build /usr/local/share/pixmaps/supercollider.png /usr/local/share/pixmaps/supercollider.png
 COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pixmaps/supercollider.xpm
 COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
@@ -140,6 +140,12 @@ COPY jack-connector.sh /jack-connector.sh
 
 RUN mkdir -p /var/log/supervisor
 
+# Env vars for jackd
+ENV JACK_START_SERVER=true \
+    SC_JACK_DEFAULT_INPUTS=system \
+    SC_JACK_DEFAULT_OUTPUTS=system
+
+# Env vars for scsynth init
 ENV CH_OUT=2 \
     CH_IN=2 \
     SC_SYNTH_PORT=57110 \
