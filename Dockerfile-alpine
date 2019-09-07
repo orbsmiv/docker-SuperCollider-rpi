@@ -1,9 +1,9 @@
-FROM balenalib/raspberrypi3-alpine:3.9-build AS build
+FROM balenalib/raspberrypi3-alpine:3.10-build AS build
 MAINTAINER orbsmiv@hotmail.com
 
 #RUN [ "cross-build-start" ]
 
-ARG SC_VERSION="Version-3.10.2"
+ARG SC_VERSION="Version-3.10.3"
 ARG SC_PLUG_VERSION="Version-3.10.0"
 
 RUN apk update && \
@@ -71,7 +71,7 @@ RUN cmake -L \
 #RUN [ "cross-build-end" ]
 
 
-FROM balenalib/raspberrypi3-alpine:3.9-run
+FROM balenalib/raspberrypi3-alpine:3.10-run
 
 #RUN [ "cross-build-start" ]
 
@@ -80,7 +80,9 @@ RUN apk update && \
     jack \
     tini \
     fftw \
-    libsndfile
+    libsndfile \
+    su-exec \
+    linux-pam
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
 COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
@@ -94,6 +96,19 @@ COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/sh
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
+
+RUN addgroup sc-user && adduser -D sc-user -G sc-user
+
+# We run the container with device /dev/snd mapped so need to ensure that sc-user is a member
+# of the host's audio group
+RUN addgroup -g 29 audiorpi && addgroup sc-user audiorpi
+RUN mkdir -p /etc/security && \
+    echo "echo @audiorpi - memlock unlimited" >> /etc/security/limits.d/99-realtime.conf && \
+    echo "echo @audiorpi - rtprio 99" >> /etc/security/limits.d/99-realtime.conf
+
+RUN mkdir /sc-workdir && chown sc-user:sc-user /sc-workdir
+
+WORKDIR /sc-workdir
 
 # Env vars for jackd
 ENV JACK_NO_AUDIO_RESERVATION=1 \
@@ -115,6 +130,6 @@ ENV CH_OUT=2 \
 ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
 
 # The following command runs a shell with the scsynth command to ensure that env vars can be interpreted
-CMD ["/bin/sh", "-c", "/usr/local/bin/scsynth -u ${SC_SYNTH_PORT} -m ${SC_MEM} -D 0 -R 0 -i ${CH_IN} -o ${CH_OUT} -z ${SC_BLOCK}"]
+CMD ["/bin/sh", "-c", "/usr/local/bin/scsynth -B 0.0.0.0 -u ${SC_SYNTH_PORT} -m ${SC_MEM} -D 0 -R 0 -i ${CH_IN} -o ${CH_OUT} -z ${SC_BLOCK}"]
 
 #RUN [ "cross-build-end" ]
