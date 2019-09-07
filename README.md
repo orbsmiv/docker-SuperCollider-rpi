@@ -1,8 +1,16 @@
 ### Experimental SuperCollider Docker build for Raspberry Pi
 
-Docker run command:
-`docker run -it --rm --device /dev/snd -p 57150:57150/udp orbsmiv/supercollider-rpi`
+#### To build:
 
+Execute the following command to build the Alpine-based image:
+```
+docker build -t orbsmiv/supercollider-rpi:test --file Dockerfile-alpine .
+```
+
+
+Docker run command:
+`docker run -it --rm --ulimit memlock=-1 --ulimit rtprio=99 --device /dev/snd -p 57110:57110/udp orbsmiv/supercollider-rpi`
+Note that it's not necessary to run with SYS-NICE capability as rtprio ulimit setting will take care of the realtime priority in jack
 
 Order in which to execute (wrap in entrypoint.sh):
 - jackd
