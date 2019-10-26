@@ -115,7 +115,8 @@ ENV JACK_NO_AUDIO_RESERVATION=1 \
     JACK_START_SERVER=true \
     SC_JACK_DEFAULT_INPUTS=system \
     SC_JACK_DEFAULT_OUTPUTS=system \
-    SC_PLUGIN_PATH=/usr/local/share/SuperCollider/Extensions
+    SC_PLUGIN_PATH=/usr/local/share/SuperCollider/Extensions \
+    SHORTS=false
 
 # Env vars for scsynth init
 ENV CH_OUT=2 \
