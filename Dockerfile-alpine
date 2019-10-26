@@ -127,6 +127,8 @@ ENV CH_OUT=2 \
     SC_MEM=131072 \
     ALSA_DEV="hw:0"
 
+USER sc-user
+
 ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
 
 # The following command runs a shell with the scsynth command to ensure that env vars can be interpreted
