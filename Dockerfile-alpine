@@ -81,7 +81,6 @@ RUN apk update && \
     tini \
     fftw \
     libsndfile \
-    su-exec \
     linux-pam
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
@@ -94,9 +93,6 @@ COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pi
 COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
 COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
 RUN addgroup sc-user && adduser -D sc-user -G sc-user
 
 # We run the container with device /dev/snd mapped so need to ensure that sc-user is a member
@@ -107,6 +103,9 @@ RUN mkdir -p /etc/security && \
     echo "echo @audiorpi - rtprio 99" >> /etc/security/limits.d/99-realtime.conf
 
 RUN mkdir /sc-workdir && chown sc-user:sc-user /sc-workdir
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 WORKDIR /sc-workdir
 
