@@ -1,9 +1,9 @@
-FROM balenalib/raspberrypi3-alpine:3.10-build AS build
+FROM balenalib/raspberrypi3-alpine:3.11-build AS build
 MAINTAINER orbsmiv@hotmail.com
 
 #RUN [ "cross-build-start" ]
 
-ARG SC_VERSION="Version-3.10.3"
+ARG SC_VERSION="Version-3.10.4"
 ARG SC_PLUG_VERSION="Version-3.10.0"
 
 RUN apk update && \
@@ -71,7 +71,7 @@ RUN cmake -L \
 #RUN [ "cross-build-end" ]
 
 
-FROM balenalib/raspberrypi3-alpine:3.10-run
+FROM balenalib/raspberrypi3-alpine:3.11-run
 
 #RUN [ "cross-build-start" ]
 
