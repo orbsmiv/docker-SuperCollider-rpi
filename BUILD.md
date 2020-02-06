@@ -3,7 +3,7 @@
 ## Build command:
 
 ```
-docker build -t orbsmiv/supercollider-rpi:3.10.4 -f ./Dockerfile-alpine .
+docker build -t orbsmiv/supercollider-rpi:3.10.4 .
 ```
 
 ### Updating latest tag
