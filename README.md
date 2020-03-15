@@ -9,7 +9,10 @@ docker build -t orbsmiv/supercollider-rpi:test --file Dockerfile-alpine .
 
 
 Docker run command:
-`docker run -it --rm --ulimit memlock=-1 --ulimit rtprio=99 --device /dev/snd -p 57110:57110/udp orbsmiv/supercollider-rpi`
+
+```
+docker run --init -it --rm --ulimit memlock=-1 --ulimit rtprio=99 --device /dev/snd -p 57110:57110/udp orbsmiv/supercollider-rpi
+```
 Note that it's not necessary to run with SYS-NICE capability as rtprio ulimit setting will take care of the realtime priority in jack
 
 Order in which to execute (wrap in entrypoint.sh):
