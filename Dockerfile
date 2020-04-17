@@ -3,7 +3,7 @@ MAINTAINER orbsmiv@hotmail.com
 
 #RUN [ "cross-build-start" ]
 
-ARG SC_VERSION="Version-3.10.4"
+ARG SC_VERSION="Version-3.11.0"
 ARG SC_PLUG_VERSION="Version-3.10.0"
 
 RUN apk update && \
