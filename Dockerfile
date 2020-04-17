@@ -24,6 +24,10 @@ RUN mkdir /tmp/supercollider-compile \
 # Alpine uses musl libc (instead of glibc) and doesn't include GLOB_TILDE
 RUN sed -i'' "s@GLOB_TILDE@GLOB_ERR@" /tmp/supercollider-compile/common/SC_Filesystem_unix.cpp
 
+# Bump Link to more recent commit than current release of 3.0.2 and update submodules
+# This resolves an underlying ASIO compile bug that was fixed upstream
+RUN cd /tmp/supercollider-compile/external_libraries/link && git checkout 0b77cc2 && git submodule update
+
 RUN mkdir /tmp/supercollider-compile/build
 
 WORKDIR /tmp/supercollider-compile/build
