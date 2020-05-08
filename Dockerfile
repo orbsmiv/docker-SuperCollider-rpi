@@ -4,7 +4,6 @@ MAINTAINER orbsmiv@hotmail.com
 #RUN [ "cross-build-start" ]
 
 ARG SC_VERSION="Version-3.11.0"
-ARG SC_PLUG_VERSION="Version-3.10.0"
 
 RUN apk update && \
     apk --no-cache add \
@@ -50,6 +49,8 @@ RUN cmake -L \
             .. \
         && make -j $(nproc) \
         && make install
+
+ARG SC_PLUG_VERSION="Version-3.11.0-rc2"
 
 RUN mkdir /tmp/supercollider-plugs-compile \
         && git clone --recursive --depth 1 --branch ${SC_PLUG_VERSION} \
