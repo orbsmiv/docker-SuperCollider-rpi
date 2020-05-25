@@ -77,7 +77,7 @@ jobs:
           --output "type=image,push=false" \
           --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
           --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
-          --tag ${{ steps.prepare.outputs.docker_image }}:${{ needs.latest-version.outputs.latest_release_name }} \
+          --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
           --tag ${{ steps.prepare.outputs.docker_image }}:latest \
           --file ./Dockerfile \
           .
