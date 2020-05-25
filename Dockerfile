@@ -1,18 +1,21 @@
-FROM balenalib/raspberrypi3-alpine:3.11-build AS build
+FROM alpine:3.11 AS build
 MAINTAINER orbsmiv@hotmail.com
-
-#RUN [ "cross-build-start" ]
 
 ARG SC_VERSION="Version-3.11.0"
 
 RUN apk update && \
     apk --no-cache add \
+    git \
+    gcc \
+    g++ \
     jack-dev \
     fftw-dev \
     libsndfile-dev \
     cmake \
+    make \
     alsa-lib-dev \
     eudev-dev \
+    linux-headers \
     bsd-compat-headers
 
 RUN mkdir /tmp/supercollider-compile \
@@ -70,17 +73,12 @@ RUN cmake -L \
         && make -j $(nproc) \
         && make install
 
-#RUN [ "cross-build-end" ]
 
-
-FROM balenalib/raspberrypi3-alpine:3.11-run
-
-#RUN [ "cross-build-start" ]
+FROM alpine:3.11
 
 RUN apk update && \
     apk --no-cache add \
     jack \
-    tini \
     fftw \
     libsndfile \
     linux-pam
@@ -135,5 +133,3 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # The following command runs a shell with the scsynth command to ensure that env vars can be interpreted
 CMD ["/bin/sh", "-c", "/usr/local/bin/scsynth -B 0.0.0.0 -u ${SC_SYNTH_PORT} -m ${SC_MEM} -D 0 -R 0 -i ${CH_IN} -o ${CH_OUT} -z ${SC_BLOCK}"]
-
-#RUN [ "cross-build-end" ]
