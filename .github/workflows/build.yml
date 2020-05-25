@@ -90,18 +90,18 @@ jobs:
         run: |
           echo "${DOCKER_TOKEN}" | docker login --username "${{ steps.prepare.outputs.docker_username }}" --password-stdin
 
-      - name: Run Buildx (with push)
-        if: success() && github.ref == 'refs/heads/master'
-        run: |
-          docker buildx build \
-          --platform ${{ steps.prepare.outputs.docker_platforms }} \
-          --output "type=image,push=true" \
-          --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
-          --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
-          --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
-          --tag ${{ steps.prepare.outputs.docker_image }}:latest \
-          --file ./Dockerfile \
-          .
+      # - name: Run Buildx (with push)
+      #   if: success() && github.ref == 'refs/heads/master'
+      #   run: |
+      #     docker buildx build \
+      #     --platform ${{ steps.prepare.outputs.docker_platforms }} \
+      #     --output "type=image,push=true" \
+      #     --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
+      #     --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
+      #     --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
+      #     --tag ${{ steps.prepare.outputs.docker_image }}:latest \
+      #     --file ./Dockerfile \
+      #     .
           
       - name: Push pull request build to testing Docker Hub repo
         if: success() && github.event_name == 'pull_request'
