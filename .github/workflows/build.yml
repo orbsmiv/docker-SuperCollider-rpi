@@ -1,9 +1,9 @@
 on:
-    schedule:
-      - cron: "*/55 * * * *"
-    pull_request:
-      branches:
-        - master
+  schedule:
+    - cron: "*/55 * * * *"
+  pull_request:
+    branches:
+      - master
   
 name: Docker Build
 jobs:
