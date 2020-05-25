@@ -39,7 +39,6 @@ jobs:
     needs: latest-version
     if: github.event_name == 'pull_request' || needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp || needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
     steps:
-    steps:
       - name: New release notification
         if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp || needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
         run: |
