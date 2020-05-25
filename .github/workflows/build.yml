@@ -50,7 +50,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7,linux/arm64
+          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7
           echo ::set-output name=docker_username::orbsmiv
           echo ::set-output name=docker_image_testing::orbsmiv/testing
           echo ::set-output name=docker_image::orbsmiv/supercollider-rpi
