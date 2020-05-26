@@ -27,7 +27,7 @@ jobs:
         OWNER: supercollider
         REPO: supercollider
       run: |
-        release_json = $(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
         echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
         echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
     - name: Get Latest SC Plugins
@@ -36,7 +36,7 @@ jobs:
         OWNER: supercollider
         REPO: sc3-plugins
       run: |
-        release_json = $(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
         echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
         echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
 
