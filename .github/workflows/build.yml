@@ -61,7 +61,9 @@ jobs:
           echo ::set-output name=docker_username::orbsmiv
           echo ::set-output name=docker_image_testing::orbsmiv/testing
           echo ::set-output name=docker_image::orbsmiv/supercollider-rpi
-          echo ::set-output name=tag_name::${{ needs.latest-version.outputs.latest_sc_release_name }}-plugsver-${{ needs.latest-version.outputs.latest_plugs_release_name }}
+          sc_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_sc_release_name }})
+          sc_plugs_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_plugs_release_name }})
+          echo ::set-output name=tag_name::${sc_tag}-plugsver-${sc_plugs_tag}
 
       - uses: actions/checkout@v2
 
