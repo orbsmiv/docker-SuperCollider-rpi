@@ -23,16 +23,23 @@ jobs:
         echo "::set-output name=timestamp::$(curl -L --silent https://registry.hub.docker.com/v2/repositories/orbsmiv/supercollider-rpi/tags/latest | python3 -c "import sys, json; print(json.load(sys.stdin)['last_updated'])")"
     - name: Get Latest SuperCollider
       id: latest_sc_release
-      uses: abatilo/release-info-action@v1.1.0
-      with:
-        owner: supercollider
-        repo: supercollider
+      env:
+        OWNER: supercollider
+        REPO: supercollider
+      run: |
+        release_json = $(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
+        echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
     - name: Get Latest SC Plugins
       id: latest_plugs_release
-      uses: abatilo/release-info-action@v1.1.0
-      with:
-        owner: supercollider
-        repo: sc3-plugins
+      env:
+        OWNER: supercollider
+        REPO: sc3-plugins
+      run: |
+        release_json = $(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
+        echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
+
 
   docker_buildx:
     runs-on: ubuntu-18.04
