@@ -79,6 +79,7 @@ FROM alpine:3.11
 RUN apk update && \
     apk --no-cache add \
     jack \
+    eudev \
     fftw \
     libsndfile \
     linux-pam
