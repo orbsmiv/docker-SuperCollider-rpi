@@ -63,7 +63,7 @@ jobs:
           echo ::set-output name=docker_image::orbsmiv/supercollider-rpi
           sc_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_sc_release_name }})
           sc_plugs_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_plugs_release_name }})
-          echo ::set-output name=tag_name::${sc_tag}-plugsver-${sc_plugs_tag}
+          echo ::set-output name=tag_name::${sc_tag}-sc3plugs-${sc_plugs_tag}
 
       - uses: actions/checkout@v2
 
