@@ -1,24 +1,22 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env ash
 
-# if [ "$1" = 'postgres' ]; then
-#     chown -R postgres "$PGDATA"
-#
-#     if [ -z "$(ls -A "$PGDATA")" ]; then
-#         gosu postgres initdb
-#     fi
-#
-#     exec gosu postgres "$@"
-# fi
-#
-# exec "$@"
+# Define the jackd server options - see https://github.com/jackaudio/jackaudio.github.com/wiki/jackdrc(5)
+BASE_OPTIONS="/usr/bin/jackd -m -R -P 99 -p 32 -T -d alsa"
 
-jackd -m -r -p 32 -T -d alsa -d hw:0 -n 3 -o 2 -p 2048 -P -r 48000 -s &
+ALSA_OPTIONS="--device=${ALSA_DEV} --nperiods=3 --inchannels=${CH_IN} --outchannels=${CH_OUT} --period=${HW_BUFF} --rate=${SR} --softmode"
 
-sleep 3
+if [ "${SHORTS}" = "true" ]; then
+    ALSA_OPTIONS="${ALSA_OPTIONS} --shorts"
+fi
 
-exec scsynth -u 57150 -m 131072 -D 0 -R 0 -o 2 -z 128 &
+if [ "${CH_IN}" -lt "1" ]; then
+    ALSA_OPTIONS="${ALSA_OPTIONS} --playback"
+fi
 
-sleep 3
+if [ "${CH_OUT}" -lt "1" ]; then
+    ALSA_OPTIONS="${ALSA_OPTIONS} --capture"
+fi
 
-jack_connect SuperCollider:out_1 system:playback_1 && jack_connect SuperCollider:out_2 system:playback_2
+echo "${BASE_OPTIONS}" "${ALSA_OPTIONS}" > "${HOME}"/.jackdrc
+
+exec "$@"

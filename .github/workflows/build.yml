@@ -1,6 +1,6 @@
 on:
-#   schedule:
-#     - cron: "*/55 * * * *"
+  schedule:
+    - cron: "0 */6 * * *"
   pull_request:
     branches:
       - master
@@ -23,16 +23,23 @@ jobs:
         echo "::set-output name=timestamp::$(curl -L --silent https://registry.hub.docker.com/v2/repositories/orbsmiv/supercollider-rpi/tags/latest | python3 -c "import sys, json; print(json.load(sys.stdin)['last_updated'])")"
     - name: Get Latest SuperCollider
       id: latest_sc_release
-      uses: abatilo/release-info-action@v1.1.0
-      with:
-        owner: supercollider
-        repo: supercollider
+      env:
+        OWNER: supercollider
+        REPO: supercollider
+      run: |
+        release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
+        echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
     - name: Get Latest SC Plugins
       id: latest_plugs_release
-      uses: abatilo/release-info-action@v1.1.0
-      with:
-        owner: supercollider
-        repo: sc3-plugins
+      env:
+        OWNER: supercollider
+        REPO: sc3-plugins
+      run: |
+        release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
+        echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
+        echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
+
 
   docker_buildx:
     runs-on: ubuntu-18.04
@@ -42,19 +49,21 @@ jobs:
       - name: New release notification
         if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp || needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
         run: |
-          echo "Version ${{ needs.latest-version.outputs.latest_sc_release_name }} was released at ${{ needs.latest-version.outputs.latest_sc_release_timestamp }}"
-          echo "Version ${{ needs.latest-version.outputs.latest_plugs_release_name }} was released at ${{ needs.latest-version.outputs.latest_plugs_release_timestamp }}"
-          echo "Latest tag published at ${{ needs.latest-version.outputs.latest_image_timestamp }}"
+          echo "SuperCollider ${{ needs.latest-version.outputs.latest_sc_release_name }} was released at ${{ needs.latest-version.outputs.latest_sc_release_timestamp }}"
+          echo "SC Plugins ${{ needs.latest-version.outputs.latest_plugs_release_name }} was released at ${{ needs.latest-version.outputs.latest_plugs_release_timestamp }}"
+          echo "Latest tag published to Docker Hub at ${{ needs.latest-version.outputs.latest_image_timestamp }}"
           echo "One of the releases is newer than latest hub image. Build required."
 
       - name: Prepare
         id: prepare
         run: |
-          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7,linux/arm64
+          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7
           echo ::set-output name=docker_username::orbsmiv
           echo ::set-output name=docker_image_testing::orbsmiv/testing
           echo ::set-output name=docker_image::orbsmiv/supercollider-rpi
-          echo ::set-output name=tag_name::${{ needs.latest-version.outputs.latest_sc_release_name }}-plugsver-${{ needs.latest-version.outputs.latest_plugs_release_name }}
+          sc_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_sc_release_name }})
+          sc_plugs_tag=$(sed -n "s/Version-\(.*\)/\1/p" <<< ${{ needs.latest-version.outputs.latest_plugs_release_name }})
+          echo ::set-output name=tag_name::${sc_tag}-sc3plugs-${sc_plugs_tag}
 
       - uses: actions/checkout@v2
 
@@ -77,7 +86,7 @@ jobs:
           --output "type=image,push=false" \
           --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
           --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
-          --tag ${{ steps.prepare.outputs.docker_image }}:${{ needs.latest-version.outputs.latest_release_name }} \
+          --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
           --tag ${{ steps.prepare.outputs.docker_image }}:latest \
           --file ./Dockerfile \
           .
@@ -89,18 +98,18 @@ jobs:
         run: |
           echo "${DOCKER_TOKEN}" | docker login --username "${{ steps.prepare.outputs.docker_username }}" --password-stdin
 
-      # - name: Run Buildx (with push)
-      #   if: success() && github.ref == 'refs/heads/master'
-      #   run: |
-      #     docker buildx build \
-      #     --platform ${{ steps.prepare.outputs.docker_platforms }} \
-      #     --output "type=image,push=true" \
-      #     --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
-      #     --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
-      #     --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
-      #     --tag ${{ steps.prepare.outputs.docker_image }}:latest \
-      #     --file ./Dockerfile \
-      #     .
+      - name: Run Buildx (with push)
+        if: success() && github.ref == 'refs/heads/master'
+        run: |
+          docker buildx build \
+          --platform ${{ steps.prepare.outputs.docker_platforms }} \
+          --output "type=image,push=true" \
+          --build-arg "SC_VERSION=${{ needs.latest-version.outputs.latest_sc_release_name }}" \
+          --build-arg "SC_PLUG_VERSION=${{ needs.latest-version.outputs.latest_plugs_release_name }}" \
+          --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.tag_name }} \
+          --tag ${{ steps.prepare.outputs.docker_image }}:latest \
+          --file ./Dockerfile \
+          .
           
       - name: Push pull request build to testing Docker Hub repo
         if: success() && github.event_name == 'pull_request'

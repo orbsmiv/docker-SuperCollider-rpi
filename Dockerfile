@@ -1,38 +1,31 @@
-# FROM resin/raspberrypi3-debian:latest AS build
-FROM orbsmiv/jackaudiojack2-rpi:latest AS build
+FROM alpine:3.11 AS build
 MAINTAINER orbsmiv@hotmail.com
 
-RUN [ "cross-build-start" ]
+ARG SC_VERSION="Version-3.11.0"
 
-ARG VERSION="Version-3.10.2"
-
-# Set environment variables
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && \
-        apt-get install -y --no-install-recommends \
-          libicu-dev \
-          libasound2-dev \
-          libsamplerate0-dev \
-          libsndfile1-dev \
-          libreadline-dev \
-          libxt-dev \
-          libudev-dev \
-          libfftw3-dev \
-          make \
-          cmake \
-          git \
-          gcc \
-          g++
+RUN apk update && \
+    apk --no-cache add \
+    git \
+    gcc \
+    g++ \
+    jack-dev \
+    fftw-dev \
+    libsndfile-dev \
+    cmake \
+    make \
+    alsa-lib-dev \
+    eudev-dev \
+    linux-headers \
+    bsd-compat-headers
 
 RUN mkdir /tmp/supercollider-compile \
-        && git clone --recursive --depth 1 --branch ${VERSION} \
+        && git clone --recursive --depth 1 --branch ${SC_VERSION} \
         git://github.com/supercollider/supercollider \
         /tmp/supercollider-compile
 
-WORKDIR /tmp/supercollider-compile
-
-RUN /bin/sed -i'' "s@mTimer.cancel();@if (error==boost::system::errc::success) {mTimer.cancel();} else {return;}@" lang/LangSource/SC_TerminalClient.cpp
+# Bump Link to more recent commit than current release of 3.0.2 and update submodules
+# This resolves an underlying ASIO compile bug that was fixed upstream
+RUN cd /tmp/supercollider-compile/external_libraries/link && git checkout 0b77cc2 && git submodule update
 
 RUN mkdir /tmp/supercollider-compile/build
 
@@ -57,16 +50,13 @@ RUN cmake -L \
             -DNO_AVAHI=ON \
             -DNO_X11=ON \
             .. \
-        && make -j 4 \
-        && make install \
-        && ldconfig \
-        && cd /
+        && make -j $(nproc) \
+        && make install
 
-# RUN mv /usr/local/share/SuperCollider/SCClassLibrary/Common/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/GUI \
-        # && mv /usr/local/share/SuperCollider/SCClassLibrary/JITLib/GUI /usr/local/share/SuperCollider/SCClassLibrary/scide_scqt/JITLibGUI
+ARG SC_PLUG_VERSION="Version-3.11.0-rc2"
 
 RUN mkdir /tmp/supercollider-plugs-compile \
-        && git clone --recursive --depth 1 \
+        && git clone --recursive --depth 1 --branch ${SC_PLUG_VERSION} \
         git://github.com/supercollider/sc3-plugins \
         /tmp/supercollider-plugs-compile
 
@@ -80,66 +70,55 @@ RUN cmake -L \
             -DNATIVE=OFF \
             -DSC_PATH=/tmp/supercollider-compile/ \
             .. \
-        && make -j 4 \
+        && make -j $(nproc) \
         && make install
 
-RUN [ "cross-build-end" ]
 
-FROM golang:1.12-alpine as supervisord-builder
+FROM alpine:3.11
 
-RUN apk add --no-cache --update git
-
-ARG SUPERVISORD_TAG="v0.5"
-
-RUN go get -v -u github.com/ochinchina/supervisord
-
-# RUN cd /go/src/github.com/ochinchina/supervisord \
-#         && git checkout tags/${SUPERVISORD_TAG}
-
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a \
-        -ldflags "-extldflags -static" -o /usr/local/bin/supervisord \
-        github.com/ochinchina/supervisord
-
-FROM orbsmiv/jackaudiojack2-rpi:latest
-
-RUN [ "cross-build-start" ]
-
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && \
-        apt-get install -y --no-install-recommends \
-        libfftw3-3 \
-        libsndfile1 \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-        && rm -rf /tmp/supercollider-compile
-
-COPY --from=supervisord-builder /usr/local/bin/supervisord /usr/local/bin/supervisord
+RUN apk update && \
+    apk --no-cache add \
+    jack \
+    eudev \
+    fftw \
+    libsndfile \
+    linux-pam
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
 COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
 COPY --from=build /usr/local/lib/SuperCollider /usr/local/lib/SuperCollider
 COPY --from=build /usr/local/bin/scsynth /usr/local/bin/scsynth
 COPY --from=build /usr/local/bin/sclang /usr/local/bin/sclang
-COPY --from=build /usr/local/share/doc/SuperCollider/examples /usr/local/share/doc/SuperCollider/examples
 COPY --from=build /usr/local/share/pixmaps/supercollider.png /usr/local/share/pixmaps/supercollider.png
 COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pixmaps/supercollider.xpm
 COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
 COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
 
-# Temporary fix to remove UIUGens, which requires libx11
-#RUN rm /usr/local/lib/SuperCollider/plugins/UIUGens.so
+RUN addgroup sc-user && adduser -D sc-user -G sc-user
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# We run the container with device /dev/snd mapped so need to ensure that sc-user is a member
+# of the host's audio group
+RUN addgroup -g 29 audiorpi && addgroup sc-user audiorpi
+RUN mkdir -p /etc/security && \
+    echo "echo @audiorpi - memlock unlimited" >> /etc/security/limits.d/99-realtime.conf && \
+    echo "echo @audiorpi - rtprio 99" >> /etc/security/limits.d/99-realtime.conf
 
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY sc-supervisord.conf /etc/supervisor/conf.d/sc-supervisord.conf
+RUN mkdir /sc-workdir && chown sc-user:sc-user /sc-workdir
 
-COPY jack-connector.sh /jack-connector.sh
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-RUN mkdir -p /var/log/supervisor
+WORKDIR /sc-workdir
 
+# Env vars for jackd
+ENV JACK_NO_AUDIO_RESERVATION=1 \
+    JACK_START_SERVER=true \
+    SC_JACK_DEFAULT_INPUTS=system \
+    SC_JACK_DEFAULT_OUTPUTS=system \
+    SC_PLUGIN_PATH=/usr/local/share/SuperCollider/Extensions \
+    SHORTS=false
+
+# Env vars for scsynth init
 ENV CH_OUT=2 \
     CH_IN=2 \
     SC_SYNTH_PORT=57110 \
@@ -149,7 +128,9 @@ ENV CH_OUT=2 \
     SC_MEM=131072 \
     ALSA_DEV="hw:0"
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+USER sc-user
 
-RUN [ "cross-build-end" ]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# The following command runs a shell with the scsynth command to ensure that env vars can be interpreted
+CMD ["/bin/sh", "-c", "/usr/local/bin/scsynth -B 0.0.0.0 -u ${SC_SYNTH_PORT} -m ${SC_MEM} -D 0 -R 0 -i ${CH_IN} -o ${CH_OUT} -z ${SC_BLOCK}"]
