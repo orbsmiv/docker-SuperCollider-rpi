@@ -40,6 +40,8 @@ RUN cmake -L \
             -DENABLE_TESTSUITE=OFF \
             -DSUPERNOVA=OFF \
             -DNATIVE=OFF \
+            -DSSE=OFF \
+            -DSSE2=OFF \
             -DSC_WII=OFF \
             -DSC_IDE=OFF \
             -DSC_QT=OFF \
