@@ -1,6 +1,6 @@
 # SuperCollider for Raspberry Pi
 
-SuperCollider, compiled for use in an armhf Docker container.
+SuperCollider, compiled for use in an Arm Docker container.
 
 Github repository: https://github.com/orbsmiv/docker-SuperCollider-rpi
 
