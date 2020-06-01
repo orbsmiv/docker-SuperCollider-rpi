@@ -39,6 +39,11 @@ jobs:
         release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
         echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
         echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
+    - name: Print version info
+      run: |
+        echo "SuperCollider info: Tag=${{steps.latest_sc_release.outputs.latest_tag}}, Timestamp=${{steps.latest_sc_release.outputs.latest_tag_published_at}}"
+        echo "SC3 Plugs info: Tag=${{steps.latest_plugs_release.outputs.latest_tag}}, Timestamp=${{steps.latest_plugs_release.outputs.latest_tag_published_at}}"
+        echo "Docker Hub info: Timestamp=${{steps.latest_image_timestamp.outputs.timestamp}}"
 
 
   docker_buildx:
