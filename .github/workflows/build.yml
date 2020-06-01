@@ -53,9 +53,9 @@ jobs:
     steps:
       - name: Print version info
         run: |
-          echo "SuperCollider info: Tag=${{needs.latest-version.outputs.latest_sc_release.outputs.latest_tag}}, Timestamp=${{needs.latest-version.outputs.latest_sc_release.outputs.latest_tag_published_at}}"
-          echo "SC3 Plugs info: Tag=${{needs.latest-version.outputs.latest_plugs_release.outputs.latest_tag}}, Timestamp=${{needs.latest-version.outputs.latest_plugs_release.outputs.latest_tag_published_at}}"
-          echo "Docker Hub info: Timestamp=${{needs.latest-version.outputs.latest_image_timestamp.outputs.timestamp}}"
+          echo "SuperCollider info: Tag=${{needs.latest-version.outputs.latest_sc_release_name}}, Timestamp=${{needs.latest-version.outputs.latest_sc_release_timestamp}}"
+          echo "SC3 Plugs info: Tag=${{needs.latest-version.outputs.latest_plugs_release_name}}, Timestamp=${{needs.latest-version.outputs.latest_plugs_release_timestamp}}"
+          echo "Docker Hub info: Timestamp=${{needs.latest-version.outputs.latest_image_timestamp}}"
 
       - name: New SuperCollider release notification
         if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
