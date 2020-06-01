@@ -11,10 +11,10 @@ jobs:
     name: Get Latest Release
     runs-on: ubuntu-18.04
     outputs:
-      latest_image_timestamp: "${{ steps.latest_image_timestamp.outputs.timestamp }}"
+      latest_image_timestamp: "ts_${{ steps.latest_image_timestamp.outputs.timestamp }}"
       latest_sc_release_timestamp: "ts_${{ steps.latest_sc_release.outputs.latest_tag_published_at }}"
       latest_sc_release_name: ${{ steps.latest_sc_release.outputs.latest_tag }}
-      latest_plugs_release_timestamp: "${{ steps.latest_plugs_release.outputs.latest_tag_published_at }}"
+      latest_plugs_release_timestamp: "ts_${{ steps.latest_plugs_release.outputs.latest_tag_published_at }}"
       latest_plugs_release_name: ${{ steps.latest_plugs_release.outputs.latest_tag }}
     steps:
     - name: Get the timestamp of the latest image on Docker Hub
@@ -38,7 +38,7 @@ jobs:
       run: |
         release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
         echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
-        echo "::set-output name=latest_tag_published_at::ts_$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
+        echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
     - name: Print version info
       run: |
         echo "SuperCollider info: Tag=${{steps.latest_sc_release.outputs.latest_tag}}, Timestamp=${{steps.latest_sc_release.outputs.latest_tag_published_at}}"
