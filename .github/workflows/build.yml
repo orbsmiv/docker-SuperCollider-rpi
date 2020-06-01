@@ -56,13 +56,20 @@ jobs:
           echo "SuperCollider info: Tag=${{needs.latest-version.outputs.latest_sc_release.outputs.latest_tag}}, Timestamp=${{needs.latest-version.outputs.latest_sc_release.outputs.latest_tag_published_at}}"
           echo "SC3 Plugs info: Tag=${{needs.latest-version.outputs.latest_plugs_release.outputs.latest_tag}}, Timestamp=${{needs.latest-version.outputs.latest_plugs_release.outputs.latest_tag_published_at}}"
           echo "Docker Hub info: Timestamp=${{needs.latest-version.outputs.latest_image_timestamp.outputs.timestamp}}"
-      - name: New release notification
-        if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp || needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
+
+      - name: New SuperCollider release notification
+        if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
         run: |
           echo "SuperCollider ${{ needs.latest-version.outputs.latest_sc_release_name }} was released at ${{ needs.latest-version.outputs.latest_sc_release_timestamp }}"
+          echo "Latest tag published to Docker Hub at ${{ needs.latest-version.outputs.latest_image_timestamp }}"
+          echo "Release is newer than latest hub image. Build required."
+
+      - name: New SC3-Plugins release notification
+        if: needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
+        run: |
           echo "SC Plugins ${{ needs.latest-version.outputs.latest_plugs_release_name }} was released at ${{ needs.latest-version.outputs.latest_plugs_release_timestamp }}"
           echo "Latest tag published to Docker Hub at ${{ needs.latest-version.outputs.latest_image_timestamp }}"
-          echo "One of the releases is newer than latest hub image. Build required."
+          echo "Release is newer than latest hub image. Build required."
 
       - name: Prepare
         id: prepare
