@@ -11,10 +11,10 @@ jobs:
     name: Get Latest Release
     runs-on: ubuntu-18.04
     outputs:
-      latest_image_timestamp: ${{ steps.latest_image_timestamp.outputs.timestamp }}
-      latest_sc_release_timestamp: ${{ steps.latest_sc_release.outputs.latest_tag_published_at }}
+      latest_image_timestamp: "ts_${{ steps.latest_image_timestamp.outputs.timestamp }}"
+      latest_sc_release_timestamp: "ts_${{ steps.latest_sc_release.outputs.latest_tag_published_at }}"
       latest_sc_release_name: ${{ steps.latest_sc_release.outputs.latest_tag }}
-      latest_plugs_release_timestamp: ${{ steps.latest_plugs_release.outputs.latest_tag_published_at }}
+      latest_plugs_release_timestamp: "ts_${{ steps.latest_plugs_release.outputs.latest_tag_published_at }}"
       latest_plugs_release_name: ${{ steps.latest_plugs_release.outputs.latest_tag }}
     steps:
     - name: Get the timestamp of the latest image on Docker Hub
@@ -39,6 +39,11 @@ jobs:
         release_json=$(curl -L --silent https://api.github.com/repos/${OWNER}/${REPO}/releases/latest)
         echo "::set-output name=latest_tag::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")"
         echo "::set-output name=latest_tag_published_at::$(echo ${release_json} | python3 -c "import sys, json; print(json.load(sys.stdin)['published_at'])")"
+    - name: Print version info
+      run: |
+        echo "SuperCollider info: Tag=${{steps.latest_sc_release.outputs.latest_tag}}, Timestamp=${{steps.latest_sc_release.outputs.latest_tag_published_at}}"
+        echo "SC3 Plugs info: Tag=${{steps.latest_plugs_release.outputs.latest_tag}}, Timestamp=${{steps.latest_plugs_release.outputs.latest_tag_published_at}}"
+        echo "Docker Hub info: Timestamp=${{steps.latest_image_timestamp.outputs.timestamp}}"
 
 
   docker_buildx:
@@ -46,6 +51,12 @@ jobs:
     needs: latest-version
     if: github.event_name == 'pull_request' || needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp || needs.latest-version.outputs.latest_plugs_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
     steps:
+      - name: Print version info
+        run: |
+          echo "SuperCollider info: Tag=${{needs.latest-version.outputs.latest_sc_release_name}}, Timestamp=${{needs.latest-version.outputs.latest_sc_release_timestamp}}"
+          echo "SC3 Plugs info: Tag=${{needs.latest-version.outputs.latest_plugs_release_name}}, Timestamp=${{needs.latest-version.outputs.latest_plugs_release_timestamp}}"
+          echo "Docker Hub info: Timestamp=${{needs.latest-version.outputs.latest_image_timestamp}}"
+
       - name: New SuperCollider release notification
         if: needs.latest-version.outputs.latest_sc_release_timestamp > needs.latest-version.outputs.latest_image_timestamp
         run: |
@@ -63,7 +74,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7
+          echo ::set-output name=docker_platforms::linux/arm/v6,linux/arm/v7,linux/arm64
           echo ::set-output name=docker_username::orbsmiv
           echo ::set-output name=docker_image_testing::orbsmiv/testing
           echo ::set-output name=docker_image::orbsmiv/supercollider-rpi
