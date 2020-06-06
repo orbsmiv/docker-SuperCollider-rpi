@@ -37,8 +37,8 @@ ARG CXX=/usr/bin/g++
 
 RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
-            -DBUILD_TESTING=ON \
-            -DENABLE_TESTSUITE=ON \
+            -DBUILD_TESTING=OFF \
+            -DENABLE_TESTSUITE=OFF \
             -DSUPERNOVA=OFF \
             -DNATIVE=OFF \
             -DSSE=OFF \
