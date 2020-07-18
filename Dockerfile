@@ -1,7 +1,7 @@
-FROM alpine:3.11 AS build
+FROM alpine:3.12 AS build
 MAINTAINER orbsmiv@hotmail.com
 
-ARG SC_VERSION="Version-3.11.0"
+ARG SC_VERSION="xxx"
 
 RUN apk update && \
     apk --no-cache add \
@@ -16,7 +16,8 @@ RUN apk update && \
     alsa-lib-dev \
     eudev-dev \
     linux-headers \
-    bsd-compat-headers
+    bsd-compat-headers \
+    readline-dev
 
 RUN mkdir /tmp/supercollider-compile \
         && git clone --recursive --depth 1 --branch ${SC_VERSION} \
@@ -42,7 +43,6 @@ RUN cmake -L \
             -DNATIVE=OFF \
             -DSSE=OFF \
             -DSSE2=OFF \
-            -DSC_WII=OFF \
             -DSC_IDE=OFF \
             -DSC_QT=OFF \
             -DSC_ED=OFF \
@@ -55,7 +55,7 @@ RUN cmake -L \
         && make -j $(nproc) \
         && make install
 
-ARG SC_PLUG_VERSION="Version-3.11.0-rc2"
+ARG SC_PLUG_VERSION="xxx"
 
 RUN mkdir /tmp/supercollider-plugs-compile \
         && git clone --recursive --depth 1 --branch ${SC_PLUG_VERSION} \
@@ -76,7 +76,7 @@ RUN cmake -L \
         && make install
 
 
-FROM alpine:3.11
+FROM alpine:3.12
 
 RUN apk update && \
     apk --no-cache add \
@@ -84,7 +84,8 @@ RUN apk update && \
     eudev \
     fftw \
     libsndfile \
-    linux-pam
+    linux-pam \
+    readline
 
 COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
 COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
