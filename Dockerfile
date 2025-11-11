@@ -1,5 +1,61 @@
-FROM alpine:3.12 AS build
-MAINTAINER orbsmiv@hotmail.com
+FROM alpine:3.22 AS plug_base
+LABEL org.opencontainers.image.authors="orbsmiv@hotmail.com"
+
+ARG SC_PLUG_BASE_VERSION="Version-3.13.1"
+
+RUN apk update && \
+    apk --no-cache add \
+    git \
+    gcc \
+    g++ \
+    jack-dev \
+    fftw-dev \
+    libsndfile-dev \
+    cmake \
+    make \
+    alsa-lib-dev \
+    eudev-dev \
+    linux-headers \
+    bsd-compat-headers \
+    readline-dev
+
+RUN mkdir /tmp/supercollider-compile \
+        && git clone --recursive --depth 1 --branch ${SC_PLUG_BASE_VERSION} \
+        https://github.com/supercollider/supercollider \
+        /tmp/supercollider-compile
+
+# Bump Link to more recent release and update submodules
+RUN cd /tmp/supercollider-compile/external_libraries/link && git checkout Link-3.1.4 && git submodule update
+
+RUN mkdir /tmp/supercollider-compile/build
+
+WORKDIR /tmp/supercollider-compile/build
+
+ARG CC=/usr/bin/gcc
+ARG CXX=/usr/bin/g++
+
+RUN cmake -L \
+            -DCMAKE_BUILD_TYPE="Release" \
+            -DBUILD_TESTING=ON \
+            -DENABLE_TESTSUITE=ON \
+            -DSUPERNOVA=ON \
+            -DNATIVE=OFF \
+            -DSSE=OFF \
+            -DSSE2=OFF \
+            -DSC_IDE=OFF \
+            -DSC_QT=OFF \
+            -DSC_ED=OFF \
+            -DSC_EL=OFF \
+            -DINSTALL_HELP=OFF \
+            -DSC_VIM=ON \
+            -DNO_AVAHI=ON \
+            -DNO_X11=ON \
+            .. \
+        && make -j $(nproc) \
+        && make install
+
+FROM alpine:3.22 AS build
+LABEL org.opencontainers.image.authors="orbsmiv@hotmail.com"
 
 ARG SC_VERSION="xxx"
 
@@ -21,12 +77,11 @@ RUN apk update && \
 
 RUN mkdir /tmp/supercollider-compile \
         && git clone --recursive --depth 1 --branch ${SC_VERSION} \
-        git://github.com/supercollider/supercollider \
+        https://github.com/supercollider/supercollider \
         /tmp/supercollider-compile
 
-# Bump Link to more recent commit than current release of 3.0.2 and update submodules
-# This resolves an underlying ASIO compile bug that was fixed upstream
-RUN cd /tmp/supercollider-compile/external_libraries/link && git checkout 0b77cc2 && git submodule update
+# Bump Link to more recent release and update submodules
+RUN cd /tmp/supercollider-compile/external_libraries/link && git checkout Link-3.1.4 && git submodule update
 
 RUN mkdir /tmp/supercollider-compile/build
 
@@ -37,9 +92,9 @@ ARG CXX=/usr/bin/g++
 
 RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
-            -DBUILD_TESTING=OFF \
-            -DENABLE_TESTSUITE=OFF \
-            -DSUPERNOVA=OFF \
+            -DBUILD_TESTING=ON \
+            -DENABLE_TESTSUITE=ON \
+            -DSUPERNOVA=ON \
             -DNATIVE=OFF \
             -DSSE=OFF \
             -DSSE2=OFF \
@@ -51,15 +106,18 @@ RUN cmake -L \
             -DSC_VIM=ON \
             -DNO_AVAHI=ON \
             -DNO_X11=ON \
+            -DCMAKE_INSTALL_PREFIX=/tmp/sc-directory \
             .. \
         && make -j $(nproc) \
         && make install
+
+FROM plug_base AS plug_build_final
 
 ARG SC_PLUG_VERSION="xxx"
 
 RUN mkdir /tmp/supercollider-plugs-compile \
         && git clone --recursive --depth 1 --branch ${SC_PLUG_VERSION} \
-        git://github.com/supercollider/sc3-plugins \
+        https://github.com/supercollider/sc3-plugins \
         /tmp/supercollider-plugs-compile
 
 RUN mkdir /tmp/supercollider-plugs-compile/build
@@ -68,15 +126,17 @@ WORKDIR /tmp/supercollider-plugs-compile/build
 
 RUN cmake -L \
             -DCMAKE_BUILD_TYPE="Release" \
-            -DSUPERNOVA=OFF \
+            -DSUPERNOVA=ON \
             -DNATIVE=OFF \
             -DSC_PATH=/tmp/supercollider-compile/ \
+            -DCMAKE_INSTALL_PREFIX=/tmp/plugs-directory \
             .. \
         && make -j $(nproc) \
         && make install
 
 
-FROM alpine:3.12
+FROM alpine:3.22
+LABEL org.opencontainers.image.authors="orbsmiv@hotmail.com"
 
 RUN apk update && \
     apk --no-cache add \
@@ -87,15 +147,11 @@ RUN apk update && \
     linux-pam \
     readline
 
-COPY --from=build /usr/local/include/SuperCollider /usr/local/include/SuperCollider
-COPY --from=build /usr/local/share/SuperCollider /usr/local/share/SuperCollider
-COPY --from=build /usr/local/lib/SuperCollider /usr/local/lib/SuperCollider
-COPY --from=build /usr/local/bin/scsynth /usr/local/bin/scsynth
-COPY --from=build /usr/local/bin/sclang /usr/local/bin/sclang
-COPY --from=build /usr/local/share/pixmaps/supercollider.png /usr/local/share/pixmaps/supercollider.png
-COPY --from=build /usr/local/share/pixmaps/supercollider.xpm /usr/local/share/pixmaps/supercollider.xpm
-COPY --from=build /usr/local/share/pixmaps/sc_ide.svg /usr/local/share/pixmaps/sc_ide.svg
-COPY --from=build /usr/local/share/mime/packages/supercollider.xml /usr/local/share/mime/packages/supercollider.xml
+# Copy SuperCollider files
+COPY --from=build /tmp/sc-directory /usr/local
+
+# Copy SC3plugins files
+COPY --from=plug_build_final /tmp/plugs-directory /usr/local
 
 RUN addgroup sc-user && adduser -D sc-user -G sc-user
 
